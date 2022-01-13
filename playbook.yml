@@ -1,0 +1,37 @@
+- hosts: myserver
+  vars:
+    - image: kevinmustafa1993/web-apache-hub
+
+  tasks:
+    - name: Install python-docker in Ubuntu
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - python3
+        - python3-docker
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install python-docker in CentOS
+      yum:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - python3
+        - python3-docker
+      when: ansible_distribution == "CentOS"
+
+    - name: Pull docker image
+      docker_image:
+        name: "{{ image }}"
+        state: present
+        force: yes
+
+    - name: Run container
+      docker_container:
+        name: web_server
+        image: "{{ image }}"
+        state: started
+        published_ports:
+          - 10000:80
+        recreate: yes
